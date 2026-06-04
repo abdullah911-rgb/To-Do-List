@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="slate" data-color-mode="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zenith | Ultimate Productivity Hub & Task Manager</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome for Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <!-- Chart.js for Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Canvas Confetti for task completion celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Custom Styling -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-icon">
+          <i class="fa-solid fa-compass-drafting"></i>
+        </div>
+        <span>Zenith</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul class="nav-links">
+          <li class="active" data-tab="dashboard">
+            <a href="#"><i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span></a>
+          </li>
+          <li data-tab="tasks">
+            <a href="#"><i class="fa-solid fa-list-check"></i> <span>Tasks</span></a>
+          </li>
+          <li data-tab="pomodoro">
+            <a href="#"><i class="fa-solid fa-stopwatch"></i> <span>Pomodoro</span></a>
+          </li>
+          <li data-tab="analytics">
+            <a href="#"><i class="fa-solid fa-chart-line"></i> <span>Analytics</span></a>
+          </li>
+          <li data-tab="settings">
+            <a href="#"><i class="fa-solid fa-sliders"></i> <span>Settings</span></a>
+          </li>
+        </ul>
+
+        <div class="sidebar-divider"></div>
+        
+        <div class="sidebar-section-header">
+          <span>Categories</span>
+          <button id="add-category-btn" title="Add Category"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        <ul id="sidebar-categories" class="sidebar-categories">
+          <!-- Dynamic Categories list -->
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="user-avatar">
+            <i class="fa-solid fa-user-tie"></i>
+          </div>
+          <div class="user-info">
+            <span class="user-name">Developer Guest</span>
+            <span class="user-role">Productivity Pro</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN PANEL -->
+    <main class="main-content">
+      <!-- Top header bar -->
+      <header class="app-header">
+        <div class="header-welcome">
+          <h1 id="greeting-text">Hello, Innovator!</h1>
+          <p id="current-date-text">Thursday, June 4</p>
+        </div>
+        
+        <div class="header-actions">
+          <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="global-search" placeholder="Search tasks, tags, descriptions..." />
+            <kbd class="kbd-hint">/</kbd>
+          </div>
+
+          <button id="quick-task-btn" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> <span>New Task</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW PANELS CONTAINER -->
+      <div class="view-container">
+        
+        <!-- DASHBOARD VIEW -->
+        <section id="dashboard-view" class="view-panel active">
+          <!-- Stat cards grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon-wrapper progress-icon">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+              <div class="stat-data">
+                <h3 id="stat-completion-pct">0%</h3>
+                <p>Task Completion</p>
+              </div>
+              <div class="stat-progress">
+                <div class="stat-progress-bar" id="stat-progress-bar-fill" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon-wrapper pending-icon">
+                <i class="fa-solid fa-hourglass-half"></i>
+              </div>
+              <div class="stat-data">
+                <h3 id="stat-pending-count">0</h3>
+                <p>Tasks Remaining</p>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon-wrapper pomodoro-icon">
+                <i class="fa-solid fa-clock"></i>
+              </div>
+              <div class="stat-data">
+                <h3 id="stat-pomo-sessions">0</h3>
+                <p>Pomo Sessions</p>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon-wrapper streak-icon">
+                <i class="fa-solid fa-fire"></i>
+              </div>
+              <div class="stat-data">
+                <h3 id="stat-streak-count">1</h3>
+                <p>Day Streak</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-layout">
+            <!-- Left col: Quick List / Focus Task -->
+            <div class="dashboard-col">
+              <div class="dashboard-card focus-task-card">
+                <div class="card-header">
+                  <h2>🎯 Today's Highlight</h2>
+                </div>
+                <div class="card-body" id="dashboard-focus-task">
+                  <div class="empty-state">
+                    <p>No high-priority task selected. Let's make something important our focus!</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="dashboard-card">
+                <div class="card-header">
+                  <h2>📅 Due Today / Overdue</h2>
+                </div>
+                <div class="card-body">
+                  <ul class="task-list-minimal" id="dashboard-due-today-list">
+                    <!-- Dynamic tasks -->
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right col: Pomo widget & Analytics overview -->
+            <div class="dashboard-col">
+              <div class="dashboard-card mini-pomo-card">
+                <div class="card-header">
+                  <h2>⏱️ Focus Timer</h2>
+                  <button class="btn btn-icon" id="mini-pomo-go" title="Go to Pomodoro screen">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  </button>
+                </div>
+                <div class="card-body">
+                  <div class="mini-pomo-content">
+                    <div class="mini-timer-display" id="mini-timer-time">25:00</div>
+                    <div class="mini-timer-status" id="mini-timer-mode">Focus Time</div>
+                    <div class="mini-timer-controls">
+                      <button id="mini-timer-play" class="btn btn-success btn-circle"><i class="fa-solid fa-play"></i></button>
+                      <button id="mini-timer-skip" class="btn btn-secondary btn-circle"><i class="fa-solid fa-forward"></i></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="dashboard-card">
+                <div class="card-header">
+                  <h2>📈 Productivity Overview</h2>
+                </div>
+                <div class="card-body mini-chart-container">
+                  <canvas id="mini-productivity-chart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TASKS VIEW -->
+        <section id="tasks-view" class="view-panel">
+          <!-- Action Control Bar -->
+          <div class="task-control-bar">
+            <!-- View filters -->
+            <div class="filter-pills">
+              <button class="filter-pill active" data-filter="all">All</button>
+              <button class="filter-pill" data-filter="active">Active</button>
+              <button class="filter-pill" data-filter="completed">Completed</button>
+              <button class="filter-pill" data-filter="today">Today</button>
+              <button class="filter-pill" data-filter="high">High Priority</button>
+            </div>
+
+            <!-- Sorting & Bulk Action -->
+            <div class="task-actions-group">
+              <div class="select-wrapper">
+                <select id="task-sort" class="form-select">
+                  <option value="date-desc">Newest First</option>
+                  <option value="date-asc">Oldest First</option>
+                  <option value="due-asc">Due Date (Soonest)</option>
+                  <option value="priority-desc">Priority (High to Low)</option>
+                </select>
+              </div>
+
+              <button class="btn btn-secondary btn-icon-only" id="bulk-delete-completed" title="Clear Completed Tasks">
+                <i class="fa-solid fa-trash-sweep"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Add Task Input Area -->
+          <div class="task-input-container">
+            <input type="text" id="task-input" placeholder="Add a new task (e.g., 'Design CV layout' @Work #cv #design !high)" />
+            <button id="add-task-btn" class="btn btn-primary btn-square" title="Add Task">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </div>
+          <p class="input-hint">💡 Pro-tip: Type `@Category`, `#tag`, and `!priority` (e.g. `!high`) to quick-classify!</p>
+
+          <!-- The Task List -->
+          <div class="task-list-wrapper">
+            <ul id="task-list" class="task-list">
+              <!-- Tasks will be injected here dynamically -->
+            </ul>
+            <div class="empty-state hidden" id="task-empty-state">
+              <div class="empty-state-icon"><i class="fa-regular fa-folder-open"></i></div>
+              <h3>No tasks found</h3>
+              <p>Everything is done, or try adjusting your filters!</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- POMODORO TIMER VIEW -->
+        <section id="pomodoro-view" class="view-panel">
+          <div class="pomodoro-container">
+            <div class="pomodoro-timer-wrapper">
+              <!-- Visual Progress Circle -->
+              <div class="timer-circle-container">
+                <svg class="progress-ring" width="320" height="320">
+                  <circle class="progress-ring__circle-bg" stroke="rgba(255, 255, 255, 0.05)" stroke-width="8" fill="transparent" r="148" cx="160" cy="160"/>
+                  <circle class="progress-ring__circle" id="timer-progress-bar" stroke="var(--primary-color)" stroke-width="8" fill="transparent" r="148" cx="160" cy="160"/>
+                </svg>
+                <div class="timer-display-content">
+                  <div class="timer-time" id="pomo-display-time">25:00</div>
+                  <div class="timer-mode-name" id="pomo-display-mode">Focus Session</div>
+                </div>
+              </div>
+
+              <!-- Presets -->
+              <div class="pomodoro-modes">
+                <button class="btn btn-ghost active" data-pomo-mode="focus">Pomodoro</button>
+                <button class="btn btn-ghost" data-pomo-mode="short">Short Break</button>
+                <button class="btn btn-ghost" data-pomo-mode="long">Long Break</button>
+              </div>
+
+              <!-- Controls -->
+              <div class="timer-actions">
+                <button id="pomo-play-btn" class="btn btn-primary btn-lg btn-circle-large"><i class="fa-solid fa-play"></i></button>
+                <button id="pomo-reset-btn" class="btn btn-secondary btn-circle"><i class="fa-solid fa-rotate-right"></i></button>
+              </div>
+            </div>
+
+            <!-- Task Association -->
+            <div class="pomodoro-settings-card">
+              <h3>Associate with Task</h3>
+              <div class="select-wrapper">
+                <select id="pomo-task-selector" class="form-select">
+                  <option value="">-- No Specific Task --</option>
+                  <!-- Active Tasks List -->
+                </select>
+              </div>
+              <div class="pomo-stats-row">
+                <div class="pomo-stat">
+                  <span class="pomo-stat-label">Daily Target</span>
+                  <span class="pomo-stat-value" id="pomo-target-display">0/4</span>
+                </div>
+                <div class="pomo-stat">
+                  <span class="pomo-stat-label">Total Focused Time</span>
+                  <span class="pomo-stat-value" id="pomo-total-time-display">0m</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ANALYTICS VIEW -->
+        <section id="analytics-view" class="view-panel">
+          <div class="analytics-container">
+            <div class="analytics-header-row">
+              <h2>Productivity Metrics</h2>
+              <div class="select-wrapper">
+                <select id="chart-timeframe" class="form-select">
+                  <option value="7days">Last 7 Days</option>
+                  <option value="30days">Last 30 Days</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="analytics-grid">
+              <div class="chart-card large-chart">
+                <h3>Task Completion History</h3>
+                <div class="chart-wrapper">
+                  <canvas id="productivity-history-chart"></canvas>
+                </div>
+              </div>
+
+              <div class="chart-card">
+                <h3>Task Distribution by Category</h3>
+                <div class="chart-wrapper">
+                  <canvas id="category-distribution-chart"></canvas>
+                </div>
+              </div>
+
+              <div class="chart-card">
+                <h3>Task Breakdown by Priority</h3>
+                <div class="chart-wrapper">
+                  <canvas id="priority-distribution-chart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="analytics-insights">
+              <h3>🎯 Smart Insights</h3>
+              <ul class="insights-list" id="analytics-insights-list">
+                <li><i class="fa-solid fa-sparkles text-success"></i> Add tasks and complete them to view smart trend predictions!</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- SETTINGS VIEW -->
+        <section id="settings-view" class="view-panel">
+          <div class="settings-container">
+            <!-- Styling theme presets -->
+            <div class="settings-card">
+              <h3><i class="fa-solid fa-palette"></i> Design Theme</h3>
+              <p class="settings-desc">Choose a color layout that fits your workflow.</p>
+              
+              <div class="theme-picker-grid">
+                <button class="theme-card active" data-theme-name="slate">
+                  <span class="theme-preview slate-theme"></span>
+                  <span class="theme-label">Slate Dark</span>
+                </button>
+                <button class="theme-card" data-theme-name="aurora">
+                  <span class="theme-preview aurora-theme"></span>
+                  <span class="theme-label">Aurora Borealis</span>
+                </button>
+                <button class="theme-card" data-theme-name="sunset">
+                  <span class="theme-preview sunset-theme"></span>
+                  <span class="theme-label">Neon Sunset</span>
+                </button>
+                <button class="theme-card" data-theme-name="forest">
+                  <span class="theme-preview forest-theme"></span>
+                  <span class="theme-label">Emerald Forest</span>
+                </button>
+                <button class="theme-card" data-theme-name="glass-light">
+                  <span class="theme-preview glass-light-theme"></span>
+                  <span class="theme-label">Crystal Light</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Preferences -->
+            <div class="settings-card">
+              <h3><i class="fa-solid fa-bell"></i> Preferences & Sound</h3>
+              <p class="settings-desc">Fine-tune your audio cues and timer intervals.</p>
+              
+              <div class="settings-options">
+                <div class="setting-option-row">
+                  <div class="option-info">
+                    <span class="option-title">Sound Effects</span>
+                    <span class="option-desc">Play subtle click and completion chime audio cues</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="settings-sounds" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="setting-option-row">
+                  <div class="option-info">
+                    <span class="option-title">Focus Ring Glow</span>
+                    <span class="option-desc">Display ambient glow animations when focusing</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="settings-glow" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="setting-option-row">
+                  <div class="option-info">
+                    <span class="option-title">Focus Duration (min)</span>
+                  </div>
+                  <input type="number" id="settings-focus-duration" class="form-input-inline" min="1" max="60" value="25">
+                </div>
+
+                <div class="setting-option-row">
+                  <div class="option-info">
+                    <span class="option-title">Break Duration (min)</span>
+                  </div>
+                  <input type="number" id="settings-break-duration" class="form-input-inline" min="1" max="30" value="5">
+                </div>
+              </div>
+            </div>
+
+            <!-- Data management -->
+            <div class="settings-card">
+              <h3><i class="fa-solid fa-database"></i> Data Backup & Control</h3>
+              <p class="settings-desc">Export your tasks as a JSON file or import a backup.</p>
+              
+              <div class="settings-actions-row">
+                <button id="backup-export-btn" class="btn btn-secondary">
+                  <i class="fa-solid fa-file-export"></i> Export JSON
+                </button>
+                
+                <button id="backup-import-trigger" class="btn btn-secondary">
+                  <i class="fa-solid fa-file-import"></i> Import JSON
+                </button>
+                <input type="file" id="backup-import-file" style="display: none;" accept=".json" />
+
+                <button id="app-reset-btn" class="btn btn-danger">
+                  <i class="fa-solid fa-triangle-exclamation"></i> Reset Application
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- RIGHT TASK DETAILS DRAWER (Slide-out) -->
+    <aside class="detail-drawer" id="task-detail-drawer">
+      <div class="drawer-header">
+        <h2>Task Details</h2>
+        <button class="btn btn-icon" id="close-drawer-btn" title="Close details">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="drawer-body" id="drawer-body-content">
+        <!-- Rendered Dynamically or updated via select task state -->
+        <div class="drawer-section">
+          <label class="form-label">Task Name</label>
+          <input type="text" id="detail-task-title" class="form-input form-input-bold" />
+        </div>
+
+        <div class="drawer-section grid-2-col">
+          <div>
+            <label class="form-label">Category</label>
+            <div class="select-wrapper">
+              <select id="detail-task-category" class="form-select">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Priority</label>
+            <div class="select-wrapper">
+              <select id="detail-task-priority" class="form-select">
+                <option value="none">None</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="drawer-section">
+          <label class="form-label">Due Date</label>
+          <input type="date" id="detail-task-due" class="form-input" />
+        </div>
+
+        <div class="drawer-section">
+          <label class="form-label">Description / Notes</label>
+          <textarea id="detail-task-description" class="form-textarea" placeholder="Add rich details or links here..."></textarea>
+        </div>
+
+        <!-- Subtasks Section -->
+        <div class="drawer-section">
+          <label class="form-label">Subtasks & Checklist</label>
+          <div class="subtask-progress-row">
+            <div class="subtask-progress-bar-bg">
+              <div class="subtask-progress-bar-fill" id="detail-subtask-progress" style="width: 0%;"></div>
+            </div>
+            <span class="subtask-progress-text" id="detail-subtask-text">0/0</span>
+          </div>
+
+          <div class="subtask-input-group">
+            <input type="text" id="detail-subtask-input" class="form-input" placeholder="Add a checklist item..." />
+            <button class="btn btn-secondary btn-square" id="detail-add-subtask-btn"><i class="fa-solid fa-plus"></i></button>
+          </div>
+
+          <ul class="subtask-list" id="detail-subtask-list">
+            <!-- Dynamic checklist -->
+          </ul>
+        </div>
+
+        <div class="drawer-section">
+          <label class="form-label">Tags</label>
+          <div class="tags-input-container">
+            <div class="tags-list" id="detail-tags-list">
+              <!-- Dynamically render tags -->
+            </div>
+            <input type="text" id="detail-tags-input" class="form-input-flat" placeholder="Press Enter to add tag..." />
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer-footer">
+        <button id="detail-delete-btn" class="btn btn-danger btn-full">
+          <i class="fa-solid fa-trash-can"></i> Delete Task
+        </button>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- CATEGORY ADD MODAL -->
+  <div class="modal-overlay hidden" id="category-modal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Create New Category</h3>
+        <button class="btn btn-icon" id="close-category-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Category Name</label>
+          <input type="text" id="new-category-name" class="form-input" placeholder="e.g. Work, Health, Reading..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Theme Color</label>
+          <div class="color-picker-palette">
+            <button class="color-dot active" data-color="#3b82f6" style="background-color: #3b82f6;" title="Blue"></button>
+            <button class="color-dot" data-color="#10b981" style="background-color: #10b981;" title="Emerald"></button>
+            <button class="color-dot" data-color="#ec4899" style="background-color: #ec4899;" title="Pink"></button>
+            <button class="color-dot" data-color="#f59e0b" style="background-color: #f59e0b;" title="Amber"></button>
+            <button class="color-dot" data-color="#8b5cf6" style="background-color: #8b5cf6;" title="Violet"></button>
+            <button class="color-dot" data-color="#ef4444" style="background-color: #ef4444;" title="Red"></button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancel-category-btn">Cancel</button>
+        <button class="btn btn-primary" id="save-category-btn">Save Category</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application logic -->
+  <script src="script.js"></script>
+</body>
+</html>
